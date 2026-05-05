@@ -41,14 +41,15 @@ export async function onRequestPost(context) {
 
   try {
     await env.DB.prepare(`
-      INSERT INTO lead_qualification (session_id, instagram, especialidade, faturamento, foco, created_at)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO lead_qualification (session_id, instagram, especialidade, faturamento, foco, disposto, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).bind(
       sessionId,
       body.instagram     || null,
       body.especialidade || null,
       body.faturamento   || null,
       body.foco          || null,
+      body.disposto      || null,
       now
     ).run();
   } catch (err) {

@@ -337,7 +337,20 @@
         </div>
         <div class="nav">
           <button type="button" class="btn-back" data-to="3">Voltar</button>
-          <button type="button" class="btn-next" id="btn-4" disabled>Concluir</button>
+          <button type="button" class="btn-next" id="btn-4" disabled>Próximo</button>
+        </div>
+      </div>
+
+      <!-- Passo 5: Disposição para investir -->
+      <div class="step" data-step="5">
+        <div class="step-question">Você está disposto a investir para implementar um processo validado, para no mínimo alcançar 50% de margem de lucro, aumentar até 30% seu faturamento e trabalhar menos?</div>
+        <div class="options" id="opts-disp">
+          <label class="option"><input type="radio" name="disposto" value="Sim"><span class="option-dot"></span><span class="option-label">Sim, estou disposto</span></label>
+          <label class="option"><input type="radio" name="disposto" value="Não"><span class="option-dot"></span><span class="option-label">Não, acredito que ainda não seja meu momento de crescer</span></label>
+        </div>
+        <div class="nav">
+          <button type="button" class="btn-back" data-to="4">Voltar</button>
+          <button type="button" class="btn-next" id="btn-5" disabled>Concluir</button>
         </div>
       </div>
 
@@ -359,7 +372,7 @@
 
 <script>
 (function () {
-  const TOTAL = 4;
+  const TOTAL = 5;
   let currentStep = 1;
 
   const progressFill  = document.getElementById('progress-fill');
@@ -368,7 +381,7 @@
   const successEl     = document.getElementById('success');
   const progressWrap  = document.getElementById('progress-wrap');
 
-  const FIELD = { 1: 'instagram', 2: 'especialidade', 3: 'faturamento', 4: 'foco' };
+  const FIELD = { 1: 'instagram', 2: 'especialidade', 3: 'faturamento', 4: 'foco', 5: 'disposto' };
 
   function getStep(n) { return document.querySelector(`.step[data-step="${n}"]`); }
   function getCookieVal(name) {
@@ -417,14 +430,14 @@
     btn.addEventListener('click', () => showStep(parseInt(btn.getAttribute('data-to'), 10)));
   });
 
-  // Next buttons (steps 1–3 advance to next step)
-  [1, 2, 3].forEach(n => {
+  // Next buttons (steps 1–4 advance to next step)
+  [1, 2, 3, 4].forEach(n => {
     document.getElementById(`btn-${n}`).addEventListener('click', () => showStep(n + 1));
   });
 
-  // Step 4: submit
-  document.getElementById('btn-4').addEventListener('click', async () => {
-    const btn = document.getElementById('btn-4');
+  // Step 5: submit
+  document.getElementById('btn-5').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-5');
     btn.disabled = true;
     btn.textContent = 'Enviando…';
 
@@ -433,7 +446,7 @@
     // Step 1 is a text input
     data.instagram = instagramInput.value.trim().replace(/^@+/, '');
 
-    // Steps 2–4 are radio groups
+    // Steps 2–5 are radio groups
     for (let s = 2; s <= TOTAL; s++) {
       const checked = form.querySelector(`input[name="${FIELD[s]}"]:checked`);
       if (checked) data[FIELD[s]] = checked.value;
