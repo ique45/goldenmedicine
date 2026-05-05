@@ -71,8 +71,7 @@ export async function onRequestGet(context) {
         q.instagram,
         q.especialidade,
         q.faturamento,
-        q.foco,
-        q.disposto
+        q.foco
       FROM event_log e
       LEFT JOIN lead_qualification q ON e.session_id = q.session_id
       WHERE e.event_name = 'Lead'

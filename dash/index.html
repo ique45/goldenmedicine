@@ -132,9 +132,9 @@
       </div>
 
       <div class="card p-5">
-        <div class="section-title">Prontos para Investir</div>
+        <div class="section-title">MQL (fat. ≥ 75k/mês)</div>
         <div class="text-4xl font-semibold tracking-tight mono" id="kpi-prontos">—</div>
-        <div class="text-xs mt-1.5" style="color:var(--muted)">responderam "Sim" na qualificação</div>
+        <div class="text-xs mt-1.5" style="color:var(--muted)">leads com faturamento acima de 75k/mês</div>
       </div>
 
     </section>
@@ -159,13 +159,12 @@
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Instagram</th>
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Especialidade</th>
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Faturamento</th>
-              <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Disposto</th>
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Origem</th>
               <th class="text-center px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Meta</th>
             </tr>
           </thead>
           <tbody id="leads-tbody">
-            <tr><td colspan="9" class="py-10 text-center" style="color:var(--muted)">Carregando…</td></tr>
+            <tr><td colspan="8" class="py-10 text-center" style="color:var(--muted)">Carregando…</td></tr>
           </tbody>
         </table>
       </div>
@@ -272,12 +271,6 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function dispondoBadge(val) {
-    if (!val) return '<span style="color:var(--muted)">—</span>';
-    if (val === 'Sim') return '<span class="badge badge-green">✓ Sim</span>';
-    return '<span class="badge badge-muted">Não</span>';
-  }
-
   function metaBadge(ok) {
     return ok
       ? '<span class="badge badge-green">✓ ok</span>'
@@ -308,7 +301,7 @@
     });
 
     const tbody = qs('#leads-tbody');
-    tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center" style="color:var(--muted)">Carregando…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center" style="color:var(--muted)">Carregando…</td></tr>';
 
     try {
       const data = await fetchJson(`/api/leads?days=${days}&limit=200`);
@@ -316,7 +309,8 @@
 
       const total   = leadsData.length;
       const wPhone  = leadsData.filter(l => l.raw_phone).length;
-      const prontos = leadsData.filter(l => l.disposto === 'Sim').length;
+      const MQL_FAT = new Set(['Entre 75k e 100k','Entre 100k e 150k','Entre 150k e 200k','Acima de 200k']);
+      const prontos = leadsData.filter(l => MQL_FAT.has(l.faturamento)).length;
 
       qs('#kpi-total').textContent   = total;
       qs('#kpi-phone').textContent   = wPhone;
@@ -324,7 +318,7 @@
       qs('#table-count').textContent = total > 0 ? `${total} resultado${total !== 1 ? 's' : ''}` : '';
 
       if (total === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="py-10 text-center" style="color:var(--muted)">Nenhum lead neste período.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center" style="color:var(--muted)">Nenhum lead neste período.</td></tr>';
         return;
       }
 
@@ -336,7 +330,6 @@
           <td class="px-4 py-3 text-xs" style="color:var(--dim)">${l.instagram ? '<span style="color:#6366f1">@</span>' + escapeHtml(l.instagram) : '<span style="color:var(--muted)">—</span>'}</td>
           <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--dim)">${escapeHtml(l.especialidade || '—')}</td>
           <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--dim)">${escapeHtml(l.faturamento || '—')}</td>
-          <td class="px-4 py-3">${dispondoBadge(l.disposto)}</td>
           <td class="px-4 py-3">${originBadge(l.utm_source)}</td>
           <td class="px-4 py-3 text-center">${metaBadge(l.meta_response_ok)}</td>
         </tr>
@@ -347,7 +340,7 @@
       });
 
     } catch (err) {
-      tbody.innerHTML = `<tr><td colspan="9" class="py-10 text-center" style="color:var(--red)">Erro: ${escapeHtml(err.message)}</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center" style="color:var(--red)">Erro: ${escapeHtml(err.message)}</td></tr>`;
     }
   }
 
@@ -356,7 +349,7 @@
     qs('#modal-title').textContent  = lead.raw_name || 'Lead';
     qs('#modal-subtitle').textContent = fmtDate(lead.timestamp) + (lead.raw_phone ? ' · ' + lead.raw_phone : '');
 
-    const hasQual = lead.instagram || lead.especialidade || lead.faturamento || lead.foco || lead.disposto;
+    const hasQual = lead.instagram || lead.especialidade || lead.faturamento || lead.foco;
 
     const metaBadgeHtml = lead.meta_response_ok
       ? `<span class="badge badge-green">✓ aceito${lead.meta_status_code ? ` · HTTP ${lead.meta_status_code}` : ''}</span>`
@@ -386,7 +379,6 @@
           <div><div class="text-xs mb-0.5" style="color:var(--muted)">Especialidade</div><div>${escapeHtml(lead.especialidade || '—')}</div></div>
           <div><div class="text-xs mb-0.5" style="color:var(--muted)">Faturamento mensal</div><div>${escapeHtml(lead.faturamento || '—')}</div></div>
           <div><div class="text-xs mb-0.5" style="color:var(--muted)">Principal foco</div><div>${escapeHtml(lead.foco || '—')}</div></div>
-          <div class="col-span-2"><div class="text-xs mb-0.5" style="color:var(--muted)">Disposto a investir?</div><div>${dispondoBadge(lead.disposto)}</div></div>
         </div>
       </div>` : ''}
 
