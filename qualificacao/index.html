@@ -455,11 +455,16 @@
     data.session_id = getCookieVal('_krob_sid');
 
     try {
-      await fetch('/qualificacao', {
+      const resp = await fetch('/qualificacao', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
+      const result = await resp.json();
+      if (result.mql) {
+        window.location.href = '/agendar?nome=' + encodeURIComponent(result.nome || '');
+        return;
+      }
     } catch (_) {}
 
     form.style.display = 'none';

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agendar Reunião</title>
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --gold:       #C9A84C;
+      --gold-light: #E8CC7A;
+      --gold-dark:  #8B6914;
+      --obsidian:   #0A0A0A;
+      --cream:      #F8F4EC;
+      --white:      #FFFFFF;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans:  'Inter', -apple-system, sans-serif;
+      --radius: 2px;
+      --t: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html, body { height: 100%; margin: 0; }
+
+    body {
+      font-family: var(--sans);
+      color: var(--cream);
+      background: var(--obsidian);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: -30%; left: 50%;
+      transform: translateX(-50%);
+      width: 80vw; height: 80vw;
+      max-width: 800px; max-height: 800px;
+      background: radial-gradient(ellipse at center,
+        rgba(201,168,76,0.09) 0%,
+        rgba(201,168,76,0.04) 40%,
+        transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    main {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: grid; place-items: center;
+      padding: 4rem 1.5rem;
+    }
+
+    .container {
+      width: 100%; max-width: 560px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+    }
+
+    /* Logomark */
+    .logomark { display: flex; align-items: center; gap: 10px; margin-bottom: 3rem; }
+    .lm-line { width: 28px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .lm-line.r { background: linear-gradient(90deg, var(--gold), transparent); }
+    .lm-dot { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); box-shadow: 0 0 10px rgba(201,168,76,.5); }
+
+    /* Eyebrow */
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: .5rem;
+      font-size: .6875rem; font-weight: 500; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--gold);
+      margin-bottom: 1.75rem;
+    }
+    .eyebrow-dot { font-size: .6rem; opacity: .7; }
+
+    /* Name */
+    .lead-name {
+      font-family: var(--serif);
+      font-size: clamp(1.125rem, 3vw, 1.5rem);
+      font-weight: 300;
+      font-style: italic;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 0 0 .5rem;
+      display: block;
+    }
+
+    /* Headline */
+    h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5.5vw, 3.25rem);
+      font-weight: 300; line-height: 1.1;
+      color: var(--white); margin: 0 0 1rem;
+    }
+    h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Mentors */
+    .mentors {
+      display: flex; align-items: center; gap: .75rem;
+      justify-content: center; flex-wrap: wrap;
+      margin: 1.25rem 0 2.5rem;
+    }
+    .mentor-chip {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .4375rem .875rem;
+      border: 1px solid rgba(201,168,76,.25);
+      border-radius: 999px;
+      font-size: .8125rem; font-weight: 400;
+      color: var(--cream);
+    }
+    .mentor-chip .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+    .mentors-sep {
+      font-family: var(--serif);
+      font-size: .875rem; color: rgba(248,244,236,.25);
+      font-style: italic;
+    }
+
+    /* CTA Button */
+    .cta-btn {
+      position: relative;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 100%; max-width: 420px;
+      padding: 1.0625rem 2rem;
+      border-radius: var(--radius);
+      border: none; cursor: pointer;
+      font-family: var(--sans); font-size: .875rem; font-weight: 500;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--obsidian);
+      text-decoration: none;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      box-shadow: 0 1px 0 rgba(255,255,255,.14) inset, 0 6px 24px rgba(201,168,76,.28);
+      transition: transform var(--t), filter var(--t), box-shadow var(--t);
+      overflow: hidden;
+    }
+    .cta-btn::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.14) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .cta-btn:hover {
+      filter: brightness(1.07); transform: translateY(-2px);
+      box-shadow: 0 1px 0 rgba(255,255,255,.14) inset, 0 10px 32px rgba(201,168,76,.35);
+    }
+    .cta-btn:active { transform: translateY(0); }
+
+    /* Ornament divider */
+    .ornament { display: flex; align-items: center; gap: 12px; margin: 2.5rem 0; width: 100%; max-width: 280px; }
+    .orn-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,.2), transparent); }
+    .orn-glyph { font-family: var(--serif); font-size: .875rem; color: var(--gold); opacity: .45; }
+
+    /* Disclaimer */
+    .disclaimer {
+      font-size: .8125rem; font-weight: 300; line-height: 1.65;
+      color: rgba(248,244,236,.35);
+      max-width: 360px;
+    }
+
+    /* Footer ornament */
+    .footer-ornament { display: flex; align-items: center; gap: 8px; margin-top: 3.5rem; opacity: .12; }
+    .fo-line { width: 18px; height: 1px; background: var(--gold); }
+    .fo-glyph { font-size: .5rem; color: var(--gold); letter-spacing: .15em; text-transform: uppercase; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .fade-in { animation: fadeUp .45s ease-out both; }
+    .delay-1 { animation-delay: .1s; }
+    .delay-2 { animation-delay: .22s; }
+    .delay-3 { animation-delay: .36s; }
+
+    @media (max-width: 480px) { main { padding: 3rem 1.25rem; } }
+  </style>
+</head>
+<body>
+<main>
+  <div class="container">
+
+    <div class="logomark fade-in" aria-hidden="true">
+      <span class="lm-line"></span>
+      <span class="lm-dot"></span>
+      <span class="lm-line r"></span>
+    </div>
+
+    <p class="eyebrow fade-in">
+      <span class="eyebrow-dot">✦</span>
+      Você está qualificado
+      <span class="eyebrow-dot">✦</span>
+    </p>
+
+    <span class="lead-name fade-in delay-1" id="lead-name" style="display:none"></span>
+
+    <h1 class="fade-in delay-1">
+      Agende uma <em>pré-reunião</em><br>de diagnóstico
+    </h1>
+
+    <div class="mentors fade-in delay-2">
+      <div class="mentor-chip"><span class="dot"></span>Jhonata</div>
+      <span class="mentors-sep">ou</span>
+      <div class="mentor-chip"><span class="dot"></span>Igor</div>
+    </div>
+
+    <a id="cta-btn" href="#" class="cta-btn fade-in delay-2">
+      Escolher meu horário
+    </a>
+
+    <div class="ornament fade-in delay-3" aria-hidden="true">
+      <span class="orn-line"></span><span class="orn-glyph">✦</span><span class="orn-line"></span>
+    </div>
+
+    <p class="disclaimer fade-in delay-3">
+      Caso você não agende um horário, entraremos em contato por ligação e WhatsApp.
+    </p>
+
+    <div class="footer-ornament fade-in delay-3" aria-hidden="true">
+      <span class="fo-line"></span><span class="fo-glyph">✦</span><span class="fo-line"></span>
+    </div>
+
+  </div>
+</main>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const fullNome = params.get('nome') || '';
+  const primeiroNome = fullNome.trim().split(/\s+/)[0] || '';
+
+  if (primeiroNome) {
+    const el = document.getElementById('lead-name');
+    el.textContent = primeiroNome + ',';
+    el.style.display = 'block';
+  }
+})();
+</script>
+</body>
+</html>
