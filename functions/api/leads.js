@@ -23,8 +23,7 @@ export async function onRequestGet(context) {
 
   const botClause = includeBots ? '' : 'AND e.is_bot = 0';
 
-  try {
-    const rows = await env.DB.prepare(`
+  const BASE_SQL = `
       SELECT
         e.event_id,
         e.timestamp,
@@ -56,21 +55,45 @@ export async function onRequestGet(context) {
         s.fbclid,
         s.gclid,
         s.referrer,
-        s.landing_url,
+        s.landing_url
+      FROM event_log e
+      LEFT JOIN sessions s ON e.session_id = s.session_id
+      WHERE e.event_name = 'Lead'
+        AND e.timestamp >= ?
+        ${botClause}
+      ORDER BY e.timestamp DESC
+      LIMIT ?
+  `;
+
+  const QUAL_SQL = `
+      SELECT
+        e.event_id,
         q.instagram,
         q.especialidade,
         q.faturamento,
         q.foco,
         q.disposto
       FROM event_log e
-      LEFT JOIN sessions s ON e.session_id = s.session_id
       LEFT JOIN lead_qualification q ON e.session_id = q.session_id
       WHERE e.event_name = 'Lead'
         AND e.timestamp >= ?
         ${botClause}
       ORDER BY e.timestamp DESC
       LIMIT ?
-    `).bind(since, limit).all();
+  `;
+
+  try {
+    const [baseResult, qualResult] = await Promise.all([
+      env.DB.prepare(BASE_SQL).bind(since, limit).all(),
+      env.DB.prepare(QUAL_SQL).bind(since, limit).all().catch(() => ({ results: [] })),
+    ]);
+
+    // Merge qual data into base rows by event_id
+    const qualMap = {};
+    for (const q of (qualResult.results || [])) {
+      qualMap[q.event_id] = q;
+    }
+    const rows = { results: (baseResult.results || []).map(r => ({ ...r, ...(qualMap[r.event_id] || {}) })) };
 
     // Summary counts grouped by utm_source for the summary card above the table.
     const summary = await env.DB.prepare(`
