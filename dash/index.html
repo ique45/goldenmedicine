@@ -67,6 +67,7 @@
   .badge-red    { background: var(--red-bg);    color: var(--red); }
   .badge-yellow { background: var(--yellow-bg); color: var(--yellow); }
   .badge-muted  { background: #f0f0f5; color: var(--muted); }
+  .badge-blue   { background: #dbeafe; color: #1d4ed8; }
 
   /* Section titles */
   .section-title {
@@ -160,7 +161,7 @@
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Especialidade</th>
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Faturamento</th>
               <th class="text-left px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Origem</th>
-              <th class="text-center px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Meta</th>
+              <th class="text-center px-4 py-2.5 text-xs font-semibold" style="color:var(--dim)">Tipo</th>
             </tr>
           </thead>
           <tbody id="leads-tbody">
@@ -331,7 +332,7 @@
           <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--dim)">${escapeHtml(l.especialidade || '—')}</td>
           <td class="px-4 py-3 text-xs whitespace-nowrap" style="color:var(--dim)">${escapeHtml(l.faturamento || '—')}</td>
           <td class="px-4 py-3">${originBadge(l.utm_source)}</td>
-          <td class="px-4 py-3 text-center">${metaBadge(l.meta_response_ok)}</td>
+          <td class="px-4 py-3 text-center">${MQL_FAT.has(l.faturamento) ? '<span class="badge badge-blue">MQL</span>' : '<span class="badge badge-muted">Lead</span>'}</td>
         </tr>
       `).join('');
 
