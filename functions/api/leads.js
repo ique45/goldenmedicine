@@ -65,34 +65,34 @@ export async function onRequestGet(context) {
       LIMIT ?
   `;
 
-  const QUAL_SQL = `
-      SELECT
-        e.event_id,
-        q.instagram,
-        q.especialidade,
-        q.faturamento,
-        q.foco
-      FROM event_log e
-      LEFT JOIN lead_qualification q ON e.session_id = q.session_id
-      WHERE e.event_name = 'Lead'
-        AND e.timestamp >= ?
-        ${botClause}
-      ORDER BY e.timestamp DESC
-      LIMIT ?
-  `;
-
   try {
-    const [baseResult, qualResult] = await Promise.all([
-      env.DB.prepare(BASE_SQL).bind(since, limit).all(),
-      env.DB.prepare(QUAL_SQL).bind(since, limit).all().catch(() => ({ results: [] })),
-    ]);
+    const baseResult = await env.DB.prepare(BASE_SQL).bind(since, limit).all();
+    const leads = baseResult.results || [];
 
-    // Merge qual data into base rows by event_id
-    const qualMap = {};
-    for (const q of (qualResult.results || [])) {
-      qualMap[q.event_id] = q;
+    // Collect unique session IDs so we can query lead_qualification directly.
+    // Merging by session_id (not event_id) is correct because lead_qualification
+    // only has a session_id FK — there is no event_id column in that table.
+    const sessionIds = [...new Set(leads.map(l => l.session_id).filter(Boolean))];
+
+    let qualMap = {};
+    if (sessionIds.length > 0) {
+      try {
+        const placeholders = sessionIds.map(() => '?').join(',');
+        const qualResult = await env.DB.prepare(`
+          SELECT session_id, instagram, especialidade, faturamento, foco
+          FROM lead_qualification
+          WHERE session_id IN (${placeholders})
+          ORDER BY created_at DESC
+        `).bind(...sessionIds).all();
+
+        for (const q of (qualResult.results || [])) {
+          // Keep first row per session (DESC order → most recent wins)
+          if (!qualMap[q.session_id]) qualMap[q.session_id] = q;
+        }
+      } catch (_) {}
     }
-    const rows = { results: (baseResult.results || []).map(r => ({ ...r, ...(qualMap[r.event_id] || {}) })) };
+
+    const mergedLeads = leads.map(r => ({ ...r, ...(qualMap[r.session_id] || {}) }));
 
     // Summary counts grouped by utm_source for the summary card above the table.
     const summary = await env.DB.prepare(`
@@ -110,7 +110,7 @@ export async function onRequestGet(context) {
 
     return json({
       days,
-      leads: rows.results || [],
+      leads: mergedLeads,
       summary: summary.results || [],
     });
   } catch (err) {
