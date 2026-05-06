@@ -461,6 +461,7 @@
         body: JSON.stringify(data),
       });
       const result = await resp.json();
+      console.log('[qualificacao debug]', JSON.stringify(result));
       if (result.mql) {
         window.location.href = '/agendar?nome=' + encodeURIComponent(result.nome || '');
         return;
