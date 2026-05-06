@@ -461,11 +461,8 @@
         body: JSON.stringify(data),
       });
       const result = await resp.json();
-      console.log('[qualificacao debug]', JSON.stringify(result));
-      if (result.mql) {
-        window.location.href = '/agendar?nome=' + encodeURIComponent(result.nome || '');
-        return;
-      }
+      document.body.innerHTML = '<pre style="color:#fff;background:#000;padding:2rem;font-size:13px;white-space:pre-wrap">' + JSON.stringify(result, null, 2) + '</pre>';
+      return;
     } catch (_) {}
 
     form.style.display = 'none';
