@@ -58,7 +58,6 @@ export async function onRequestPost(context) {
 
   const isMQL = MQL_FATURAMENTOS.has(body.faturamento);
   let leadName = '';
-  let mqlDebug = null;
 
   if (isMQL) {
     const [sessionRow, leadRow] = await Promise.all([
@@ -73,10 +72,12 @@ export async function onRequestPost(context) {
     leadName = leadRow?.raw_name || '';
 
     const pageUrl = `https://${new URL(request.url).host}/qualificacao`;
-    mqlDebug = await fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl, now });
+    context.waitUntil(
+      fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl, now })
+    );
   }
 
-  return json({ ok: true, mql: isMQL, nome: leadName, debug: mqlDebug });
+  return json({ ok: true, mql: isMQL, nome: leadName });
 }
 
 // -------------------------------------------------------
@@ -129,14 +130,12 @@ async function fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl
   }
 
   try {
-    const res = await fetch(
+    await fetch(
       `https://graph.facebook.com/v25.0/${env.META_PIXEL_ID}/events?access_token=${env.META_ACCESS_TOKEN}`,
       { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
     );
-    const resBody = await res.json().catch(() => null);
-    return { status: res.status, ok: res.ok, body: resBody, pixel_id: env.META_PIXEL_ID };
   } catch (err) {
-    return { error: err.message };
+    console.error('MQL CAPI error:', err.message);
   }
 }
 
