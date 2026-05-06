@@ -58,9 +58,9 @@ export async function onRequestPost(context) {
 
   const isMQL = MQL_FATURAMENTOS.has(body.faturamento);
   let leadName = '';
+  let mqlDebug = null;
 
   if (isMQL) {
-    // Busca dados da sessão e do lead para enriquecer o CAPI
     const [sessionRow, leadRow] = await Promise.all([
       env.DB.prepare(
         'SELECT fbp, fbc, external_id, ip_address, user_agent, landing_url FROM sessions WHERE session_id = ? LIMIT 1'
@@ -73,12 +73,10 @@ export async function onRequestPost(context) {
     leadName = leadRow?.raw_name || '';
 
     const pageUrl = `https://${new URL(request.url).host}/qualificacao`;
-    context.waitUntil(
-      fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl, now })
-    );
+    mqlDebug = await fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl, now });
   }
 
-  return json({ ok: true, mql: isMQL, nome: leadName });
+  return json({ ok: true, mql: isMQL, nome: leadName, debug: mqlDebug });
 }
 
 // -------------------------------------------------------
@@ -131,12 +129,14 @@ async function fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl
   }
 
   try {
-    await fetch(
+    const res = await fetch(
       `https://graph.facebook.com/v25.0/${env.META_PIXEL_ID}/events?access_token=${env.META_ACCESS_TOKEN}`,
       { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
     );
+    const resBody = await res.json().catch(() => null);
+    return { status: res.status, ok: res.ok, body: resBody, pixel_id: env.META_PIXEL_ID };
   } catch (err) {
-    console.error('MQL CAPI error:', err.message);
+    return { error: err.message };
   }
 }
 
