@@ -171,6 +171,38 @@
       </div>
     </section>
 
+    <!-- Analytics: Especialidade + Faturamento -->
+    <section class="fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="section-title">Especialidade</div>
+        <div id="chart-especialidade" class="space-y-2.5 mt-1">
+          <div class="text-xs py-6 text-center" style="color:var(--muted)">Carregando…</div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <div class="section-title">Faturamento Mensal</div>
+        <div id="chart-faturamento" class="space-y-2.5 mt-1">
+          <div class="text-xs py-6 text-center" style="color:var(--muted)">Carregando…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analytics: Foco + Disposto -->
+    <section class="fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="card p-5">
+        <div class="section-title">Principal Foco</div>
+        <div id="chart-foco" class="space-y-2.5 mt-1">
+          <div class="text-xs py-6 text-center" style="color:var(--muted)">Carregando…</div>
+        </div>
+      </div>
+      <div class="card p-5">
+        <div class="section-title">Disposto a Investir</div>
+        <div id="chart-disposto" class="space-y-2.5 mt-1">
+          <div class="text-xs py-6 text-center" style="color:var(--muted)">Carregando…</div>
+        </div>
+      </div>
+    </section>
+
     <footer class="pt-2 pb-10 text-xs text-center" style="color:var(--muted)">
       Impulse Tracker &middot; Cloudflare Pages + D1
     </footer>
@@ -288,6 +320,38 @@
     return `<span class="badge ${key ? colors[key] : 'badge-muted'}">${escapeHtml(src)}</span>`;
   }
 
+  // Analytics helpers
+  function buildBreakdown(arr, field) {
+    const counts = {};
+    arr.forEach(l => { const v = l[field]; if (v) counts[v] = (counts[v] || 0) + 1; });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([label, count]) => ({ label, count }));
+  }
+
+  function renderBars(containerId, data, opts = {}) {
+    const el = qs(`#${containerId}`);
+    if (!data.length) {
+      el.innerHTML = '<div class="text-xs py-6 text-center" style="color:var(--muted)">Sem dados no período</div>';
+      return;
+    }
+    const max = Math.max(...data.map(d => d.count));
+    el.innerHTML = data.map(({ label, count }) => {
+      const pct   = Math.round(count / max * 100);
+      const isHL  = opts.highlight && opts.highlight(label);
+      const clr   = isHL ? '#3b82f6' : 'var(--accent)';
+      const badge = isHL ? ' <span class="badge badge-blue" style="font-size:.6rem;padding:.1rem .35rem;vertical-align:middle">MQL</span>' : '';
+      return `
+        <div class="flex items-center gap-3">
+          <div class="text-xs truncate" style="flex:0 0 150px;color:var(--dim)" title="${escapeHtml(label)}">${escapeHtml(label)}${badge}</div>
+          <div class="flex-1">
+            <div class="rounded-full overflow-hidden" style="height:14px;background:#f0f0f5">
+              <div class="rounded-full" style="height:14px;width:${pct}%;background:${clr};transition:width .5s ease;"></div>
+            </div>
+          </div>
+          <div class="mono text-xs" style="color:var(--muted);flex:0 0 24px;text-align:right">${count}</div>
+        </div>`;
+    }).join('');
+  }
+
   // Load leads
   async function loadLeads(days) {
     currentDays = days;
@@ -303,6 +367,10 @@
 
     const tbody = qs('#leads-tbody');
     tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center" style="color:var(--muted)">Carregando…</td></tr>';
+    ['chart-especialidade','chart-faturamento','chart-foco','chart-disposto'].forEach(id => {
+      const el = qs(`#${id}`);
+      if (el) el.innerHTML = '<div class="text-xs py-6 text-center" style="color:var(--muted)">Carregando…</div>';
+    });
 
     try {
       const data = await fetchJson(`/api/leads?days=${days}&limit=200`);
@@ -317,6 +385,11 @@
       qs('#kpi-phone').textContent   = wPhone;
       qs('#kpi-prontos').textContent = prontos;
       qs('#table-count').textContent = total > 0 ? `${total} resultado${total !== 1 ? 's' : ''}` : '';
+
+      renderBars('chart-especialidade', buildBreakdown(leadsData, 'especialidade'));
+      renderBars('chart-faturamento',   buildBreakdown(leadsData, 'faturamento'), { highlight: l => MQL_FAT.has(l) });
+      renderBars('chart-foco',          buildBreakdown(leadsData, 'foco'));
+      renderBars('chart-disposto',      buildBreakdown(leadsData, 'disposto'));
 
       if (total === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="py-10 text-center" style="color:var(--muted)">Nenhum lead neste período.</td></tr>';
