@@ -79,14 +79,16 @@
     /* Name */
     .lead-name {
       font-family: var(--serif);
-      font-size: clamp(1.125rem, 3vw, 1.5rem);
-      font-weight: 300;
+      font-size: clamp(1.75rem, 5vw, 2.75rem);
+      font-weight: 400;
       font-style: italic;
-      background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--gold-dark));
+      background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 50%, var(--gold-dark) 100%);
       -webkit-background-clip: text; background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin: 0 0 .5rem;
+      filter: drop-shadow(0 0 18px rgba(201,168,76,.35));
+      margin: 0 0 .75rem;
       display: block;
+      letter-spacing: .01em;
     }
 
     /* Headline */
@@ -211,7 +213,7 @@
       <div class="mentor-chip"><span class="dot"></span>Igor</div>
     </div>
 
-    <a id="cta-btn" href="#" class="cta-btn fade-in delay-2">
+    <a id="cta-btn" href="https://tinyurl.com/goldenmed" class="cta-btn fade-in delay-2">
       Escolher meu horário
     </a>
 
