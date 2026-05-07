@@ -86,7 +86,7 @@ export async function onRequestPost(context) {
 async function fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl, now }) {
   if (!env.META_PIXEL_ID || !env.META_ACCESS_TOKEN) return;
 
-  const eventId = crypto.randomUUID();
+  const eventId = body.event_id || crypto.randomUUID();
 
   const userData = {};
 
@@ -111,7 +111,7 @@ async function fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl
 
   const payload = {
     data: [{
-      event_name: 'MQL',
+      event_name: 'Schedule',
       event_time: now,
       event_id: eventId,
       event_source_url: pageUrl,
