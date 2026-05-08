@@ -468,7 +468,7 @@
     const MQL_FAT = new Set(['Entre 75k e 100k','Entre 100k e 150k','Entre 150k e 200k','Acima de 200k']);
     if (typeof fbq !== 'undefined' && MQL_FAT.has(data.faturamento)) {
       const scheduleEventId = crypto.randomUUID();
-      fbq('track', 'Schedule', {}, { eventID: scheduleEventId });
+      fbq('track', 'Subscribe', {}, { eventID: scheduleEventId });
       data.event_id = scheduleEventId;
     }
 

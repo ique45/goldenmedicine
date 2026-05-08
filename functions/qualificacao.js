@@ -111,7 +111,7 @@ async function fireMqlEvent({ env, sessionId, body, sessionRow, leadRow, pageUrl
 
   const payload = {
     data: [{
-      event_name: 'Schedule',
+      event_name: 'Subscribe',
       event_time: now,
       event_id: eventId,
       event_source_url: pageUrl,
