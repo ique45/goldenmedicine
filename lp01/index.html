@@ -1590,8 +1590,8 @@
         nameInput.focus();
         return;
       }
-      if (!phone) {
-        errorEl.textContent = 'Por favor, informe seu WhatsApp.';
+      if (!phone || phone.length < 10 || phone.length > 11) {
+        errorEl.textContent = 'Informe um WhatsApp válido com DDD (ex: 11 91234-5678).';
         errorEl.classList.add('is-on');
         phoneInput.focus();
         return;
