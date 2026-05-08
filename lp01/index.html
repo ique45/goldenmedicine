@@ -1584,6 +1584,19 @@
       var firstName = parts[0] || '';
       var lastName  = parts.slice(1).join(' ') || '';
 
+      if (!fullName) {
+        errorEl.textContent = 'Por favor, informe seu nome.';
+        errorEl.classList.add('is-on');
+        nameInput.focus();
+        return;
+      }
+      if (!phone) {
+        errorEl.textContent = 'Por favor, informe seu WhatsApp.';
+        errorEl.classList.add('is-on');
+        phoneInput.focus();
+        return;
+      }
+
       submitBtn.disabled = true;
       var originalHTML = submitBtn.innerHTML;
       submitBtn.textContent = 'Aguarde…';
