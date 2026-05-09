@@ -15,7 +15,7 @@ export async function onRequestGet(context) {
   const since = Math.floor(Date.now() / 1000) - days * 86400;
 
   try {
-    const totals = await env.DB.prepare(`
+    const totals = await env.GoldenMed.prepare(`
       SELECT
         COALESCE(SUM(value), 0) as gross,
         COUNT(*) as sales,
@@ -25,7 +25,7 @@ export async function onRequestGet(context) {
       WHERE created_at >= ?
     `).bind(since).first();
 
-    const series = await env.DB.prepare(`
+    const series = await env.GoldenMed.prepare(`
       SELECT
         date(created_at, 'unixepoch') as date,
         COALESCE(SUM(value), 0) as revenue,

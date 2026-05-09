@@ -24,7 +24,7 @@ export async function onRequestGet(context) {
     const where = txn ? 'WHERE transaction_id = ?' : '';
     const binds = txn ? [txn, limit, offset] : [limit, offset];
 
-    const { results: rows } = await env.DB.prepare(`
+    const { results: rows } = await env.GoldenMed.prepare(`
       SELECT
         id, created_at, event_time, trk, event_id,
         raw_email, raw_name, raw_phone,
@@ -42,7 +42,7 @@ export async function onRequestGet(context) {
     `).bind(...binds).all();
 
     // Summary cards: counts over the last 24h
-    const summary = await env.DB.prepare(`
+    const summary = await env.GoldenMed.prepare(`
       SELECT
         COUNT(*) AS total,
         SUM(CASE WHEN meta_response_ok = 1 THEN 1 ELSE 0 END) AS meta_ok,

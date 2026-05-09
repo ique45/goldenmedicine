@@ -3,7 +3,7 @@ export async function onRequestGet(context) {
   return new Response(JSON.stringify({
     dashKeySet: !!env.DASH_KEY,
     dashKeyLength: (env.DASH_KEY || '').length,
-    dbSet: !!env.DB,
+    dbSet: !!env.GoldenMed,
   }), {
     headers: { 'Content-Type': 'application/json' },
   });

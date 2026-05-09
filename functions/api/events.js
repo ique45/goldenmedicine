@@ -42,10 +42,10 @@ export async function onRequestGet(context) {
     query += ` ORDER BY timestamp DESC LIMIT ? OFFSET ?`;
     bindings.push(limit, offset);
 
-    const { results } = await env.DB.prepare(query).bind(...bindings).all();
+    const { results } = await env.GoldenMed.prepare(query).bind(...bindings).all();
 
     // Also get summary counts
-    const summary = await env.DB.prepare(`
+    const summary = await env.GoldenMed.prepare(`
       SELECT
         event_name,
         COUNT(*) as total,
@@ -58,7 +58,7 @@ export async function onRequestGet(context) {
     `).all();
 
     // Recovery stats — what WOULD have been lost without server-side
-    const recovery = await env.DB.prepare(`
+    const recovery = await env.GoldenMed.prepare(`
       SELECT
         COUNT(*) as total_events,
         SUM(CASE WHEN is_bot = 0 THEN 1 ELSE 0 END) as real_events,
@@ -75,7 +75,7 @@ export async function onRequestGet(context) {
     `).first();
 
     // Per-browser breakdown for ITP insight
-    const browserBreakdown = await env.DB.prepare(`
+    const browserBreakdown = await env.GoldenMed.prepare(`
       SELECT
         browser,
         COUNT(*) as total,

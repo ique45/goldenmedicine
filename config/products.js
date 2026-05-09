@@ -36,3 +36,4 @@ export default {
   hotmart: {},
   kiwify: {},
 };
+ 

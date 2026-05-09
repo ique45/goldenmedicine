@@ -19,9 +19,9 @@ export async function onRequestPost(context) {
     // --- Session enrichment from D1 ---
     let sessionData = {};
     const sessionId = cookies['_krob_sid'] || '';
-    if (sessionId && env.DB) {
+    if (sessionId && env.GoldenMed) {
       try {
-        const row = await env.DB.prepare(
+        const row = await env.GoldenMed.prepare(
           'SELECT * FROM sessions WHERE session_id = ?'
         ).bind(sessionId).first();
         if (row) sessionData = row;
@@ -172,8 +172,8 @@ export async function onRequestPost(context) {
     context.waitUntil(
       (async () => {
         try {
-          if (env.DB && shouldLogEvent) {
-            await env.DB.prepare(`
+          if (env.GoldenMed && shouldLogEvent) {
+            await env.GoldenMed.prepare(`
               INSERT INTO event_log (
                 session_id, event_name, event_id, timestamp,
                 browser, browser_version, os, is_mobile,

@@ -66,7 +66,7 @@ export async function onRequestGet(context) {
   `;
 
   try {
-    const baseResult = await env.DB.prepare(BASE_SQL).bind(since, limit).all();
+    const baseResult = await env.GoldenMed.prepare(BASE_SQL).bind(since, limit).all();
     const leads = baseResult.results || [];
 
     // Collect unique session IDs so we can query lead_qualification directly.
@@ -78,7 +78,7 @@ export async function onRequestGet(context) {
     if (sessionIds.length > 0) {
       try {
         const placeholders = sessionIds.map(() => '?').join(',');
-        const qualResult = await env.DB.prepare(`
+        const qualResult = await env.GoldenMed.prepare(`
           SELECT session_id, instagram, especialidade, faturamento, foco
           FROM lead_qualification
           WHERE session_id IN (${placeholders})
@@ -95,7 +95,7 @@ export async function onRequestGet(context) {
     const mergedLeads = leads.map(r => ({ ...r, ...(qualMap[r.session_id] || {}) }));
 
     // Summary counts grouped by utm_source for the summary card above the table.
-    const summary = await env.DB.prepare(`
+    const summary = await env.GoldenMed.prepare(`
       SELECT
         COALESCE(NULLIF(s.utm_source, ''), '(direct)') as utm_source,
         COUNT(*) as count

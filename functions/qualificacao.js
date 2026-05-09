@@ -40,7 +40,7 @@ export async function onRequestPost(context) {
   const now = Math.floor(Date.now() / 1000);
 
   try {
-    await env.DB.prepare(`
+    await env.GoldenMed.prepare(`
       INSERT INTO lead_qualification (session_id, instagram, especialidade, faturamento, foco, disposto, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).bind(
@@ -61,10 +61,10 @@ export async function onRequestPost(context) {
 
   if (isMQL) {
     const [sessionRow, leadRow] = await Promise.all([
-      env.DB.prepare(
+      env.GoldenMed.prepare(
         'SELECT fbp, fbc, external_id, ip_address, user_agent, landing_url FROM sessions WHERE session_id = ? LIMIT 1'
       ).bind(sessionId).first().catch(() => null),
-      env.DB.prepare(
+      env.GoldenMed.prepare(
         `SELECT raw_name, raw_phone FROM event_log WHERE session_id = ? AND event_name = 'Lead' ORDER BY timestamp DESC LIMIT 1`
       ).bind(sessionId).first().catch(() => null),
     ]);

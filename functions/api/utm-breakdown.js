@@ -64,7 +64,7 @@ export async function onRequestGet(context) {
   `;
 
   try {
-    const rows = await env.DB.prepare(query).bind(since, ...filterBindings).all();
+    const rows = await env.GoldenMed.prepare(query).bind(since, ...filterBindings).all();
     return json({
       dimension,
       days,

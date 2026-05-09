@@ -30,7 +30,7 @@ export async function onRequestGet(context) {
   const since = Math.floor(Date.now() / 1000) - days * 86400;
 
   try {
-    const rows = await env.DB.prepare(`
+    const rows = await env.GoldenMed.prepare(`
       SELECT
         CASE
           WHEN fbc IS NOT NULL AND fbc != '' THEN 'meta'
@@ -58,7 +58,7 @@ export async function onRequestGet(context) {
 
     // Meta spend from ad_spend table over the same window.
     const sinceDate = ymd(new Date(since * 1000));
-    const spendRow = await env.DB.prepare(`
+    const spendRow = await env.GoldenMed.prepare(`
       SELECT COALESCE(SUM(spend_cents), 0) as spend_cents
       FROM ad_spend
       WHERE platform = 'meta' AND date >= ?
@@ -67,7 +67,7 @@ export async function onRequestGet(context) {
     const metaSpend = Number(spendRow?.spend_cents || 0) / 100;
 
     // Last successful Meta sync (for "stale data" warnings in the UI).
-    const syncRow = await env.DB.prepare(`
+    const syncRow = await env.GoldenMed.prepare(`
       SELECT MAX(run_at) as last_synced_at
       FROM sync_log
       WHERE platform = 'meta' AND status = 'ok'

@@ -26,9 +26,9 @@ export async function onRequestPost(context) {
     // Enrich with D1 session data (server-captured fbp/fbc are more reliable)
     let sessionData = {};
     const sessionId = cookies['_krob_sid'] || '';
-    if (sessionId && env.DB) {
+    if (sessionId && env.GoldenMed) {
       try {
-        const row = await env.DB.prepare(
+        const row = await env.GoldenMed.prepare(
           'SELECT * FROM sessions WHERE session_id = ?'
         ).bind(sessionId).first();
         if (row) sessionData = row;
@@ -49,8 +49,8 @@ export async function onRequestPost(context) {
     const gaClientId = gaCookie ? gaCookie.split('.').slice(-2).join('.') : '';
     const now = Math.floor(Date.now() / 1000);
 
-    if (env.DB) {
-      await env.DB.prepare(`
+    if (env.GoldenMed) {
+      await env.GoldenMed.prepare(`
         INSERT OR REPLACE INTO checkout_sessions (
           trk, session_id, ip_address, user_agent, external_id,
           fbp, fbc, gclid, gbraid, wbraid, ga_client_id,

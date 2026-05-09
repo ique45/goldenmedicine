@@ -18,7 +18,7 @@ export async function onRequestGet(context) {
   const since = Math.floor(Date.now() / 1000) - days * 86400;
 
   try {
-    const products = await env.DB.prepare(`
+    const products = await env.GoldenMed.prepare(`
       SELECT
         product_id,
         COALESCE(MAX(product_name), product_id) as product_name,
@@ -32,7 +32,7 @@ export async function onRequestGet(context) {
       ORDER BY revenue DESC
     `).bind(since).all();
 
-    const series = await env.DB.prepare(`
+    const series = await env.GoldenMed.prepare(`
       SELECT
         date(created_at, 'unixepoch') as date,
         product_id,

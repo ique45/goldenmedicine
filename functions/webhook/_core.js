@@ -50,9 +50,9 @@ export async function processPurchase({ parsed, env, context }) {
 
   // Look up the originating checkout session (fbp, fbc, UTMs, ga_client_id, etc.)
   let checkoutData = {};
-  if (parsed.trk && env.DB) {
+  if (parsed.trk && env.GoldenMed) {
     try {
-      const row = await env.DB.prepare(
+      const row = await env.GoldenMed.prepare(
         'SELECT * FROM checkout_sessions WHERE trk = ?'
       ).bind(parsed.trk).first();
       if (row) checkoutData = row;
@@ -331,7 +331,7 @@ async function handleManyChat({ parsed, env }) {
 // HANDLER: Purchase Log — D1 insert (always runs, background)
 // -----------------------------------------------------------------------------
 async function handlePurchaseLog({ parsed, eventId, eventTime, resultMap, env }) {
-  if (!env.DB) return;
+  if (!env.GoldenMed) return;
 
   const { trk, email, name, phone, value, currency, transactionId, productId, productName, checkoutData, platformUtm, items } = parsed;
   const tracking = resultMap.tracking || {};
@@ -342,7 +342,7 @@ async function handlePurchaseLog({ parsed, eventId, eventTime, resultMap, env })
   let purchaseId = null;
 
   try {
-    const result = await env.DB.prepare(`
+    const result = await env.GoldenMed.prepare(`
       INSERT INTO purchase_log (
         trk, event_id, event_time,
         raw_email, raw_name, raw_phone,
@@ -406,7 +406,7 @@ async function handlePurchaseLog({ parsed, eventId, eventTime, resultMap, env })
   }
 
   try {
-    const itemStmt = env.DB.prepare(`
+    const itemStmt = env.GoldenMed.prepare(`
       INSERT INTO purchase_items (
         purchase_id, transaction_id, product_id, product_name,
         value, currency, created_at,
@@ -429,14 +429,14 @@ async function handlePurchaseLog({ parsed, eventId, eventTime, resultMap, env })
       platformUtm.utm_term || checkoutData.utm_term || null,
     ));
 
-    await env.DB.batch(batch);
+    await env.GoldenMed.batch(batch);
   } catch (e) {
     // Lines failed but parent succeeded — roll back parent so SUM(items) == header invariant holds.
     console.error('D1 purchase_items error, rolling back parent purchase_log row', {
       transactionId, purchaseId, error: e.message,
     });
     try {
-      await env.DB.prepare('DELETE FROM purchase_log WHERE id = ?').bind(purchaseId).run();
+      await env.GoldenMed.prepare('DELETE FROM purchase_log WHERE id = ?').bind(purchaseId).run();
     } catch (rollbackErr) {
       console.error('CRITICAL: purchase_log rollback failed — manual reconciliation needed', {
         transactionId, purchaseId, error: rollbackErr.message,

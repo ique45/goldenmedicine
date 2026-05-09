@@ -57,7 +57,7 @@ export async function onRequestPost(context) {
       `&access_token=${env.META_ADS_ACCESS_TOKEN}`;
 
     const rows = await fetchAllPages(url);
-    rowsUpserted = await upsertAdSpend(env.DB, rows);
+    rowsUpserted = await upsertAdSpend(env.GoldenMed, rows);
   } catch (err) {
     status = 'error';
     errorMessage = err.message || String(err);
@@ -69,7 +69,7 @@ export async function onRequestPost(context) {
   // Sync log write always succeeds best-effort; a logging failure shouldn't
   // make the caller think the whole sync failed.
   try {
-    await env.DB.prepare(`
+    await env.GoldenMed.prepare(`
       INSERT INTO sync_log (platform, status, rows_upserted, date_from, date_to, error_message, duration_ms, run_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).bind('meta', status, rowsUpserted, dateFrom, dateTo, errorMessage, durationMs, runAt).run();

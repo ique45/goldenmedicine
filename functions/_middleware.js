@@ -101,8 +101,8 @@ export async function onRequest(context) {
   context.waitUntil(
     (async () => {
       try {
-        if (env.DB) {
-          await env.DB.prepare(`
+        if (env.GoldenMed) {
+          await env.GoldenMed.prepare(`
             INSERT INTO sessions (session_id, external_id, fbclid, gclid, msclkid, fbc, fbp, ip_address, user_agent, referrer, landing_url, utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(session_id) DO UPDATE SET
