@@ -98,10 +98,11 @@ export async function onRequest(context) {
   });
 
   // --- D1 UPSERT (background, non-blocking) ---
+  const { isBot } = detectBot(userAgent);
   context.waitUntil(
     (async () => {
       try {
-        if (env.GoldenMed) {
+        if (env.GoldenMed && !isBot) {
           await env.GoldenMed.prepare(`
             INSERT INTO sessions (session_id, external_id, fbclid, gclid, msclkid, fbc, fbp, ip_address, user_agent, referrer, landing_url, utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -168,4 +169,21 @@ function computeSubDomainIndex(host) {
   if (CC_TLDS.has(lastTwo)) return 2;
   // Standard case: example.com → ETLD+1 has 2 labels → index 1
   return 1;
+}
+
+function detectBot(userAgent) {
+  if (!userAgent || userAgent.length < 10) return { isBot: true };
+  const patterns = [
+    /googlebot|google-inspectiontool/i,
+    /bingbot|msnbot/i,
+    /facebookexternalhit|facebot/i,
+    /twitterbot/i,
+    /linkedinbot/i,
+    /slackbot/i,
+    /whatsapp/i,
+    /bot|crawler|spider|scraper|headless/i,
+    /python-requests|axios|node-fetch|curl|wget|httpie/i,
+    /phantomjs|selenium|puppeteer|playwright/i,
+  ];
+  return { isBot: patterns.some(p => p.test(userAgent)) };
 }
