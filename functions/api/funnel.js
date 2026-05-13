@@ -19,20 +19,10 @@ export async function onRequestGet(context) {
         `SELECT COUNT(*) as count FROM sessions WHERE landing_url LIKE '%/lp01%' AND created_at >= ?`
       ).bind(since).first(),
       db.prepare(
-        `SELECT COUNT(*) as count FROM event_log e
-         LEFT JOIN sessions s ON e.session_id = s.session_id
-         WHERE e.event_name = 'ViewContent'
-           AND s.landing_url LIKE '%/lp01%'
-           AND e.timestamp >= ?
-           AND e.is_bot = 0`
+        `SELECT COUNT(*) as count FROM event_log WHERE event_name = 'ViewContent' AND timestamp >= ? AND is_bot = 0`
       ).bind(since).first(),
       db.prepare(
-        `SELECT COUNT(*) as count FROM event_log e
-         LEFT JOIN sessions s ON e.session_id = s.session_id
-         WHERE e.event_name = 'Lead'
-           AND s.landing_url LIKE '%/lp01%'
-           AND e.timestamp >= ?
-           AND e.is_bot = 0`
+        `SELECT COUNT(*) as count FROM event_log WHERE event_name = 'Lead' AND timestamp >= ? AND is_bot = 0`
       ).bind(since).first(),
     ]);
 
