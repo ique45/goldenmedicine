@@ -162,6 +162,31 @@
       </div>
     </section>
 
+    <!-- Funil -->
+    <section class="fade-in">
+      <div class="card p-5">
+        <div class="section-title">Funil da Página</div>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-3" id="funnel-row">
+          <div class="flex-1 rounded-xl p-4 text-center" style="background:#f8f8fb;border:1px solid var(--border)">
+            <div class="text-xs font-medium mb-1" style="color:var(--dim)">Visitas</div>
+            <div class="text-3xl font-semibold mono tracking-tight" id="funnel-visits">—</div>
+          </div>
+          <div class="text-center text-lg" style="color:var(--muted)">→</div>
+          <div class="flex-1 rounded-xl p-4 text-center" style="background:#f8f8fb;border:1px solid var(--border)">
+            <div class="text-xs font-medium mb-1" style="color:var(--dim)">Abriram o formulário</div>
+            <div class="text-3xl font-semibold mono tracking-tight" id="funnel-opens">—</div>
+            <div class="text-xs mt-1 mono" style="color:var(--muted)" id="funnel-opens-pct"></div>
+          </div>
+          <div class="text-center text-lg" style="color:var(--muted)">→</div>
+          <div class="flex-1 rounded-xl p-4 text-center" style="background:#f8f8fb;border:1px solid var(--border)">
+            <div class="text-xs font-medium mb-1" style="color:var(--dim)">Enviaram o formulário</div>
+            <div class="text-3xl font-semibold mono tracking-tight" id="funnel-leads">—</div>
+            <div class="text-xs mt-1 mono" style="color:var(--muted)" id="funnel-leads-pct"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Analytics: Especialidade + Faturamento -->
     <section class="fade-in grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="card p-5">
@@ -392,8 +417,20 @@
     });
 
     try {
-      const data = await fetchJson(`/api/leads?days=${days}&limit=200`);
+      const [data, funnel] = await Promise.all([
+        fetchJson(`/api/leads?days=${days}&limit=200`),
+        fetchJson(`/api/funnel?days=${days}`).catch(() => ({})),
+      ]);
       leadsData = data.leads || [];
+
+      const fVisits = funnel.visits    || 0;
+      const fOpens  = funnel.form_opens || 0;
+      const fLeads  = funnel.leads     || 0;
+      qs('#funnel-visits').textContent    = fVisits;
+      qs('#funnel-opens').textContent     = fOpens;
+      qs('#funnel-leads').textContent     = fLeads;
+      qs('#funnel-opens-pct').textContent = fVisits > 0 ? Math.round(fOpens / fVisits * 100) + '% das visitas' : '';
+      qs('#funnel-leads-pct').textContent = fVisits > 0 ? Math.round(fLeads / fVisits * 100) + '% das visitas' : '';
 
       const total   = leadsData.length;
       const MQL_FAT = new Set(['Entre 75k e 100k','Entre 100k e 150k','Entre 150k e 200k','Acima de 200k']);

@@ -1541,6 +1541,18 @@
     function openModal() {
       overlay.classList.add('is-open');
       document.body.style.overflow = 'hidden';
+      fetch('/tracker', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        keepalive: true,
+        body: JSON.stringify({
+          event_name: 'ViewContent',
+          event_id: crypto.randomUUID(),
+          event_time: Math.floor(Date.now() / 1000),
+          event_source_url: window.location.href,
+          user_data: {},
+        }),
+      }).catch(function() {});
       var firstInput = overlay.querySelector('input');
       if (firstInput) setTimeout(function() { firstInput.focus(); }, 80);
     }
