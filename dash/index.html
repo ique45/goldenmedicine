@@ -165,7 +165,10 @@
     <!-- Funil -->
     <section class="fade-in">
       <div class="card p-5">
-        <div class="section-title">Funil da Página</div>
+        <div class="flex items-center justify-between">
+          <div class="section-title">Funil da Página</div>
+          <button id="funnel-refresh" title="Atualizar" style="background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);padding:2px 6px;border-radius:6px;">↻</button>
+        </div>
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-3" id="funnel-row">
           <div class="flex-1 rounded-xl p-4 text-center" style="background:#f8f8fb;border:1px solid var(--border)">
             <div class="text-xs font-medium mb-1" style="color:var(--dim)">Visitas</div>
@@ -560,6 +563,12 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !qs('#details-modal').classList.contains('hidden')) closeModal();
   });
+
+  // Refresh button
+  qs('#funnel-refresh').addEventListener('click', () => loadLeads(currentDays));
+
+  // Auto-refresh every 60s
+  setInterval(() => { if (!qs('#app').classList.contains('hidden')) loadLeads(currentDays); }, 60000);
 })();
 </script>
 </body>
